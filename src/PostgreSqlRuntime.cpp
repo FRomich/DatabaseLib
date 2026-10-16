@@ -1,0 +1,67 @@
+#include "PostgreSqlRuntime.h"
+
+#include <Windows.h>
+#include <filesystem>
+#include <mutex>
+#include <string>
+
+namespace
+{
+    std::once_flag initFlag;
+    DLL_DIRECTORY_COOKIE dllDirectoryCookie = nullptr;
+    bool initialized = false;
+
+    // Возвращает путь к каталогу, в котором находится DatabaseLib.dll.
+    std::filesystem::path getLibraryDirectory()
+    {
+        HMODULE module = nullptr;
+
+        if (!GetModuleHandleExW(
+            GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            reinterpret_cast<LPCWSTR>(
+                reinterpret_cast<ULONG_PTR>(
+                    &ensurePostgreSqlRuntimeInitialized)),
+            &module))
+        {
+            return {};
+        }
+
+        wchar_t path[MAX_PATH]{};
+
+        const DWORD length = GetModuleFileNameW(
+            module, path, static_cast<DWORD>(std::size(path)));
+
+        if (length == 0 || length >= std::size(path))
+            return {};
+
+        return std::filesystem::path(path).parent_path();
+    }
+}
+
+bool ensurePostgreSqlRuntimeInitialized()
+{
+    std::call_once(initFlag, [] {
+        const auto dllDirectory =
+            getLibraryDirectory() /
+            L"thirdparty" /
+            L"postgresql";
+
+        if (!std::filesystem::exists(dllDirectory / L"libpq.dll"))
+            return;
+
+        // Настройка процесса: разрешаем пользовательские каталоги DLL.
+        if (!SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS))
+            return;
+
+        dllDirectoryCookie =
+            AddDllDirectory(dllDirectory.c_str());
+
+        if (!dllDirectoryCookie)
+            return;
+
+        initialized = true;
+        });
+
+    return initialized;
+}

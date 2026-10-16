@@ -1,9 +1,10 @@
-
 #include "QtDatabase.h"
 
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUuid>
+
+#include "PostgreSqlRuntime.h"
 
 namespace DatabaseLib
 {
@@ -29,6 +30,13 @@ namespace DatabaseLib
         switch (m_settings.provider)
         {
         case DatabaseProvider::PostgreSQL:
+            if (!ensurePostgreSqlRuntimeInitialized())
+            {
+                m_lastError =
+                    QStringLiteral(
+                        "Failed to initialize PostgreSQL DLL search path");
+                return false;
+            }
             driver = QStringLiteral("QPSQL");
             break;
 

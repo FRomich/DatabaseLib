@@ -23,8 +23,8 @@ qt_add_library(DatabaseLib SHARED
     src/QtDatabase.cpp
     src/DatabaseFactory.h
     src/DatabaseFactory.cpp
-    #src/PostgreSqlRuntime.h
-    #src/PostgreSqlRuntime.cpp
+    src/PostgreSqlRuntime.h
+    src/PostgreSqlRuntime.cpp
 )
 
 target_compile_definitions(DatabaseLib
@@ -79,7 +79,7 @@ if(WIN32)
                 VERBATIM
             )
         else()
-            message(WARNING
+            message(FATAL_ERROR
                 "PostgreSQL dependency not found: ${POSTGRESQL_BIN}/${DLL}"
             )
         endif()
