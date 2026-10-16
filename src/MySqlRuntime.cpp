@@ -2,8 +2,9 @@
 
 #include <Windows.h>
 #include <filesystem>
+#include <QByteArray>
 //#include <mutex>
-//#include <string>
+#include <Qstring>
 
 namespace
 {
@@ -58,6 +59,13 @@ bool ensureMySqlRuntimeInitialized()
             const DWORD error = GetLastError();
             return;
         }
+
+        const auto pluginDir = dllDirectory;
+
+        qputenv(
+            "LIBMYSQL_PLUGIN_DIR",
+            QString::fromStdWString(pluginDir.wstring()).toLocal8Bit()
+        );
 
         initialized = true;
         });

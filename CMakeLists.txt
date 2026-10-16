@@ -125,7 +125,7 @@ if(WIN32)
             )
         else()
             message(FATAL_ERROR
-                "MySQL dependency not found: ${POSTGRESQL_BIN}/${DLL}"
+                "MySQL dependency not found: ${MYSQL_BIN}/${DLL}"
             )
         endif()
     endforeach()
