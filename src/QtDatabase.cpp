@@ -5,6 +5,7 @@
 #include <QUuid>
 
 #include "PostgreSqlRuntime.h"
+#include "MySqlRuntime.h"
 
 namespace DatabaseLib
 {
@@ -41,6 +42,13 @@ namespace DatabaseLib
             break;
 
         case DatabaseProvider::MySQL:
+            if (!ensureMySqlRuntimeInitialized())
+            {
+                m_lastError =
+                    QStringLiteral(
+                        "Failed to initialize MySQL DLL search path");
+                return false;
+            }
             driver = QStringLiteral("QMYSQL");
             break;
 

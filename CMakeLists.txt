@@ -18,13 +18,19 @@ qt_add_library(DatabaseLib SHARED
     include/DatabaseSettings.h
     include/IDatabase.h
     include/DatabaseLibExport.h
+    include/DatabaseFactory.h
 
     src/QtDatabase.h
-    src/QtDatabase.cpp
-    src/DatabaseFactory.h
+    src/QtDatabase.cpp    
     src/DatabaseFactory.cpp
     src/PostgreSqlRuntime.h
     src/PostgreSqlRuntime.cpp
+    src/MySqlRuntime.cpp
+    src/MySqlRuntime.h
+)
+
+set_target_properties(DatabaseLib PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
 )
 
 target_compile_definitions(DatabaseLib
@@ -85,5 +91,45 @@ if(WIN32)
         endif()
     endforeach()
 endif()
+
+if(WIN32)
+    set(MYSQL_BIN
+        "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/mysql"
+    )
+
+    set(MYSQL_DLLS
+        libssl-3-x64.dll
+        libmysql.dll
+        libcrypto-3-x64.dll
+        mysql_native_password.dll
+    )
+
+    set(MYSQL_RUNTIME_DIR
+        "$<TARGET_FILE_DIR:DatabaseLib>/thirdparty/mysql"
+    )
+
+    add_custom_command(TARGET DatabaseLib POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "${MYSQL_RUNTIME_DIR}"
+        VERBATIM
+    )
+
+    foreach(DLL IN LISTS MYSQL_DLLS)
+        if(EXISTS "${MYSQL_BIN}/${DLL}")
+            add_custom_command(TARGET DatabaseLib POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${MYSQL_BIN}/${DLL}"
+                    "${MYSQL_RUNTIME_DIR}"
+                COMMENT "Copying MySQL dependency: ${DLL}"
+                VERBATIM
+            )
+        else()
+            message(FATAL_ERROR
+                "MySQL dependency not found: ${POSTGRESQL_BIN}/${DLL}"
+            )
+        endif()
+    endforeach()
+endif()
+
 
 

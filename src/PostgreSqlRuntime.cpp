@@ -2,8 +2,8 @@
 
 #include <Windows.h>
 #include <filesystem>
-#include <mutex>
-#include <string>
+//#include <mutex>
+//#include <string>
 
 namespace
 {
@@ -11,7 +11,6 @@ namespace
     DLL_DIRECTORY_COOKIE dllDirectoryCookie = nullptr;
     bool initialized = false;
 
-    // Возвращает путь к каталогу, в котором находится DatabaseLib.dll.
     std::filesystem::path getLibraryDirectory()
     {
         HMODULE module = nullptr;
@@ -50,15 +49,15 @@ bool ensurePostgreSqlRuntimeInitialized()
         if (!std::filesystem::exists(dllDirectory / L"libpq.dll"))
             return;
 
-        // Настройка процесса: разрешаем пользовательские каталоги DLL.
         if (!SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS))
             return;
 
-        dllDirectoryCookie =
-            AddDllDirectory(dllDirectory.c_str());
+        dllDirectoryCookie = AddDllDirectory(dllDirectory.c_str());
 
-        if (!dllDirectoryCookie)
+        if (!dllDirectoryCookie) {
+            const DWORD error = GetLastError();
             return;
+        }
 
         initialized = true;
         });
