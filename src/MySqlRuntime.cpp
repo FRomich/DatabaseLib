@@ -1,12 +1,15 @@
 #include "MySqlRuntime.h"
 
 #include <mutex>
+#include <QtGlobal>
 
 #ifdef Q_OS_WIN
 
 #include <Windows.h>
 #include <filesystem>
 #include <iterator>
+#include <QByteArray>
+#include <QString>
 
 namespace
 {
@@ -62,6 +65,13 @@ bool ensureMySqlRuntimeInitialized()
 
         if (!dllDirectoryCookie)
             return;
+
+        const auto pluginDir = dllDirectory;
+
+        qputenv(
+            "LIBMYSQL_PLUGIN_DIR",
+            QString::fromStdWString(pluginDir.wstring()).toLocal8Bit()
+        );
 
         initialized = true;
         });
