@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_PREFIX_PATH "$ENV{QTDIR}")
+if(WIN32 AND DEFINED ENV{QTDIR})
+    list(PREPEND CMAKE_PREFIX_PATH "$ENV{QTDIR}")
+endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Sql)
 
@@ -31,6 +33,7 @@ qt_add_library(DatabaseLib SHARED
 
 set_target_properties(DatabaseLib PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
 )
 
 target_compile_definitions(DatabaseLib

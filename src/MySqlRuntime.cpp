@@ -1,10 +1,12 @@
 #include "MySqlRuntime.h"
 
+#include <mutex>
+
+#ifdef Q_OS_WIN
+
 #include <Windows.h>
 #include <filesystem>
-#include <QByteArray>
-//#include <mutex>
-#include <Qstring>
+#include <iterator>
 
 namespace
 {
@@ -42,10 +44,13 @@ namespace
 bool ensureMySqlRuntimeInitialized()
 {
     std::call_once(initFlag, [] {
+        const auto libraryDirectory = getLibraryDirectory();
+
+        if (libraryDirectory.empty())
+            return;
+
         const auto dllDirectory =
-            getLibraryDirectory() /
-            L"thirdparty" /
-            L"mysql";
+            libraryDirectory / L"thirdparty" / L"mysql";
 
         if (!std::filesystem::exists(dllDirectory / L"libmysql.dll"))
             return;
@@ -55,20 +60,20 @@ bool ensureMySqlRuntimeInitialized()
 
         dllDirectoryCookie = AddDllDirectory(dllDirectory.c_str());
 
-        if (!dllDirectoryCookie) {
-            const DWORD error = GetLastError();
+        if (!dllDirectoryCookie)
             return;
-        }
-
-        const auto pluginDir = dllDirectory;
-
-        qputenv(
-            "LIBMYSQL_PLUGIN_DIR",
-            QString::fromStdWString(pluginDir.wstring()).toLocal8Bit()
-        );
 
         initialized = true;
         });
 
     return initialized;
 }
+
+#else
+
+bool ensureMySqlRuntimeInitialized()
+{
+    return true;
+}
+
+#endif

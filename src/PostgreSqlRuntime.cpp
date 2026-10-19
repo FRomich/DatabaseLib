@@ -1,9 +1,12 @@
 #include "PostgreSqlRuntime.h"
 
+#include <mutex>
+
+#ifdef Q_OS_WIN
+
 #include <Windows.h>
 #include <filesystem>
-//#include <mutex>
-//#include <string>
+#include <iterator>
 
 namespace
 {
@@ -41,10 +44,13 @@ namespace
 bool ensurePostgreSqlRuntimeInitialized()
 {
     std::call_once(initFlag, [] {
+        const auto libraryDirectory = getLibraryDirectory();
+
+        if (libraryDirectory.empty())
+            return;
+
         const auto dllDirectory =
-            getLibraryDirectory() /
-            L"thirdparty" /
-            L"postgresql";
+            libraryDirectory / L"thirdparty" / L"postgresql";
 
         if (!std::filesystem::exists(dllDirectory / L"libpq.dll"))
             return;
@@ -54,13 +60,20 @@ bool ensurePostgreSqlRuntimeInitialized()
 
         dllDirectoryCookie = AddDllDirectory(dllDirectory.c_str());
 
-        if (!dllDirectoryCookie) {
-            const DWORD error = GetLastError();
+        if (!dllDirectoryCookie)
             return;
-        }
 
         initialized = true;
         });
 
     return initialized;
 }
+
+#else
+
+bool ensurePostgreSqlRuntimeInitialized()
+{
+    return true;
+}
+
+#endif
