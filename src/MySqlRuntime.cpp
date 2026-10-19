@@ -10,6 +10,7 @@
 #include <iterator>
 #include <QByteArray>
 #include <QString>
+#include <QDebug>
 
 namespace
 {
@@ -68,10 +69,8 @@ bool ensureMySqlRuntimeInitialized()
 
         const auto pluginDir = dllDirectory;
 
-        qputenv(
-            "LIBMYSQL_PLUGIN_DIR",
-            QString::fromStdWString(pluginDir.wstring()).toLocal8Bit()
-        );
+        qputenv("LIBMYSQL_PLUGIN_DIR",
+            QString::fromStdWString(pluginDir.wstring()).toLocal8Bit());
 
         initialized = true;
         });
