@@ -25,6 +25,7 @@ namespace DatabaseLib
             return true;
 
         QString driver;
+        QString otherOptionsConnect;
 
         switch (m_settings.provider)
         {
@@ -33,8 +34,8 @@ namespace DatabaseLib
             break;
 
         case DatabaseProvider::MySQL:
-            qputenv("LIBMYSQL_PLUGIN_DIR", QCoreApplication::applicationDirPath().toLocal8Bit());
             driver = QStringLiteral("QMYSQL");
+            otherOptionsConnect = "MYSQL_PLUGIN_DIR=" + QCoreApplication::applicationDirPath();
             break;
 
         default:
@@ -53,7 +54,9 @@ namespace DatabaseLib
         m_database = QSqlDatabase::addDatabase(
             driver, m_connectionName);
 
-
+       
+        if (!otherOptionsConnect.isEmpty())
+            m_database.setConnectOptions(otherOptionsConnect);
         m_database.setHostName(m_settings.host);
         m_database.setDatabaseName(m_settings.database);
         m_database.setUserName(m_settings.user);
