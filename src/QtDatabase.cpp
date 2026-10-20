@@ -3,6 +3,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUuid>
+#include <QCoreApplication>
 
 namespace DatabaseLib
 {
@@ -32,6 +33,7 @@ namespace DatabaseLib
             break;
 
         case DatabaseProvider::MySQL:
+            qputenv("LIBMYSQL_PLUGIN_DIR", QCoreApplication::applicationDirPath().toLocal8Bit());
             driver = QStringLiteral("QMYSQL");
             break;
 
@@ -50,6 +52,7 @@ namespace DatabaseLib
 
         m_database = QSqlDatabase::addDatabase(
             driver, m_connectionName);
+
 
         m_database.setHostName(m_settings.host);
         m_database.setDatabaseName(m_settings.database);
