@@ -4,9 +4,6 @@
 #include <QSqlQuery>
 #include <QUuid>
 
-#include "PostgreSqlRuntime.h"
-#include "MySqlRuntime.h"
-
 namespace DatabaseLib
 {
     QtDatabase::QtDatabase(const DatabaseSettings& settings)
@@ -31,24 +28,10 @@ namespace DatabaseLib
         switch (m_settings.provider)
         {
         case DatabaseProvider::PostgreSQL:
-            if (!ensurePostgreSqlRuntimeInitialized())
-            {
-                m_lastError =
-                    QStringLiteral(
-                        "Failed to initialize PostgreSQL DLL search path");
-                return false;
-            }
             driver = QStringLiteral("QPSQL");
             break;
 
         case DatabaseProvider::MySQL:
-            if (!ensureMySqlRuntimeInitialized())
-            {
-                m_lastError =
-                    QStringLiteral(
-                        "Failed to initialize MySQL DLL search path");
-                return false;
-            }
             driver = QStringLiteral("QMYSQL");
             break;
 

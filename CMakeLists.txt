@@ -25,10 +25,6 @@ qt_add_library(DatabaseLib SHARED
     src/QtDatabase.h
     src/QtDatabase.cpp    
     src/DatabaseFactory.cpp
-    src/PostgreSqlRuntime.h
-    src/PostgreSqlRuntime.cpp
-    src/MySqlRuntime.cpp
-    src/MySqlRuntime.h
 )
 
 set_target_properties(DatabaseLib PROPERTIES
@@ -68,15 +64,7 @@ if(WIN32)
         libiconv-2.dll
     )
 
-    set(POSTGRESQL_RUNTIME_DIR
-        "$<TARGET_FILE_DIR:DatabaseLib>/thirdparty/postgresql"
-    )
-
-    add_custom_command(TARGET DatabaseLib POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-            "${POSTGRESQL_RUNTIME_DIR}"
-        VERBATIM
-    )
+     set(POSTGRESQL_RUNTIME_DIR "${CMAKE_BINARY_DIR}")
 
     foreach(DLL IN LISTS POSTGRESQL_DLLS)
         if(EXISTS "${POSTGRESQL_BIN}/${DLL}")
@@ -107,15 +95,7 @@ if(WIN32)
         mysql_native_password.dll
     )
 
-    set(MYSQL_RUNTIME_DIR
-        "$<TARGET_FILE_DIR:DatabaseLib>/thirdparty/mysql"
-    )
-
-    add_custom_command(TARGET DatabaseLib POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-            "${MYSQL_RUNTIME_DIR}"
-        VERBATIM
-    )
+    set(MYSQL_RUNTIME_DIR "${CMAKE_BINARY_DIR}")
 
     foreach(DLL IN LISTS MYSQL_DLLS)
         if(EXISTS "${MYSQL_BIN}/${DLL}")
